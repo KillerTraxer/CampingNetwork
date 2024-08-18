@@ -1,6 +1,10 @@
-import axios from 'axios';
 import React, { useRef, useState } from 'react'
 import useUserStore from '../features/auth/userAuth';
+import { imageDB, db } from '../firebaseConfig';
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { collection, addDoc } from "firebase/firestore";
+import { v4 } from "uuid";
+import { toast } from 'react-toastify';
 
 export default function NewPostForm() {
     const [image, setImage] = useState<File | null>(null);
@@ -47,14 +51,39 @@ export default function NewPostForm() {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('image', image);
-        formData.append('description', description);
-        formData.append('userId', user?._id!);
+        const storageRef = ref(imageDB.storage, `images/${v4()}`);
 
         try {
-            const response = await axios.post('http://localhost:3000/api/createpost', formData);
-            console.log('Publicación creada:', response.data);
+            await uploadBytes(storageRef, image);
+
+            const imageUrl = await getDownloadURL(storageRef);
+
+            const currentDate = new Date();
+
+            const postData = {
+                description,
+                userId: user?._id!,
+                imageUrl,
+                comments: [],
+                likes: [],
+                date: currentDate,
+            };
+
+            const postsCollection = collection(db, 'posts');
+
+            //@ts-ignore
+            const docRef = await addDoc(postsCollection, postData);
+
+            toast.success('Publicación creada con éxito!', {
+                position: "bottom-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                className: "bg-[#1f2937] text-white"
+            });
 
             setImage(null);
             setDescription('');

@@ -1,8 +1,10 @@
-import { collection, doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from '../firebaseConfig';
 import { useEffect, useState } from "react";
 import useUserStore from "../features/auth/userAuth";
 import { v4 } from "uuid";
+import Swal from 'sweetalert2';
+import { toast } from "react-toastify";
 
 interface User {
     _id: string;
@@ -29,7 +31,7 @@ interface Post {
     likedByCurrentUser: boolean
 }
 
-function Home() {
+function PostSaved() {
     const [posts, setPosts] = useState<Post[]>([]);
     const currentUser = useUserStore(state => state.user);
     const [comment, setComment] = useState('');
@@ -43,7 +45,7 @@ function Home() {
             const newPosts: Post[] = [];
             snapshot.forEach((doc) => {
                 const data = doc.data();
-                if (data.userId !== currentUser?._id) {
+                if (data.userId === currentUser?._id) {
                     const likedByCurrentUser = data.likes.includes(currentUser?._id);
                     newPosts.push({
                         _id: doc.id,
@@ -61,31 +63,6 @@ function Home() {
         });
         return () => unsubscribe();
     }, [currentUser]);
-
-    const toggleLike = async (postId: string) => {
-        const postRef = doc(db, 'posts', postId);
-        const postDoc = await getDoc(postRef);
-        if (postDoc.exists()) {
-            let newLikesArray = [...postDoc.data().likes];
-            const index = newLikesArray.indexOf(currentUser?._id);
-
-            if (index !== -1) {
-                newLikesArray.splice(index, 1);
-            } else {
-                newLikesArray.push(currentUser?._id);
-            }
-
-            await updateDoc(postRef, {
-                likes: newLikesArray
-            });
-
-            setPosts(prevPosts =>
-                prevPosts.map((post: any) =>
-                    post._id === postId ? { ...post, likes: newLikesArray } : post
-                )
-            );
-        }
-    };
 
     const addCommentToPost = async (postId: string, commentContent: string) => {
         const postRef = doc(db, 'posts', postId);
@@ -119,10 +96,54 @@ function Home() {
         }
     };
 
+    const deletePost = async (postId: string) => {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "Una vez eliminada, no podrás recuperarla",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            background: "#1f2937",
+            color: "#fff"
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const postRef = doc(db, 'posts', postId);
+                    await deleteDoc(postRef);
+                    setPosts(posts.filter(post => post._id !== postId));
+
+                    toast.success('Publicación eliminada', {
+                        position: "bottom-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        className: "bg-[#1f2937] text-white"
+                    });
+                } catch (error) {
+                    console.error("Error deleting post:", error);
+                    toast.error('Error tratando de eliminar el post!', {
+                        position: "bottom-right",
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        className: "bg-[#1f2937] text-white"
+                    });
+                }
+            }
+        });
+    };
+
+
     if (posts.length === 0) {
         return (
             <div className="flex flex-col gap-4 p-4 items-center">
-                <p>Sin publicaciones...</p>
+                <p>No tienes publicaciones aún...</p>
             </div>
         );
     }
@@ -131,11 +152,11 @@ function Home() {
         <div className="flex flex-col gap-4 p-4 items-center">
             {posts.map(post => {
                 return (
-                    <div key={post._id} className="bg-white rounded-lg shadow-md w-4/6 mb-3">
+                    <div key={post._id} className="bg-white rounded-lg shadow-md w-4/6 mb-3 flex flex-col">
                         <img src={post.image} className="w-full h-48 object-cover rounded-t-lg" />
                         <div className="p-4">
                             <div className="flex items-center mb-2">
-                                <svg onClick={() => toggleLike(post._id)} className={`w-6 h-6 ${post.likedByCurrentUser ? 'fill-current text-red-500' : 'text-gray-500'} cursor-pointer`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <svg className={`w-6 h-6 ${post.likedByCurrentUser ? 'fill-current text-red-500' : 'text-gray-500'} cursor-default`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
                                 <p className="text-gray-700 text-lg ml-1 cursor-default">{post.likes.length}</p>
@@ -237,6 +258,7 @@ function Home() {
                                 </form>
                             )}
                         </div>
+                        <button onClick={() => deletePost(post._id)} className="font-bold text-red-500 flex justify-center mt-2 mb-3">Eliminar publicación</button>
                     </div>
                 )
             })}
@@ -244,4 +266,4 @@ function Home() {
     );
 }
 
-export default Home;
+export default PostSaved

@@ -8,6 +8,11 @@ import Admin from './pages/Admin';
 import Sidebar from './components/Sidebar';
 import NewPost from './pages/NewPost';
 import MapsCamp from './pages/MapsCamp';
+import Register from './pages/Register';
+import PostSaved from './pages/PostSaved';
+import Adminposts from './pages/Adminposts';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const init = useUserStore(state => state.init);
@@ -15,9 +20,9 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    init(); 
+    init();
     setIsLoading(false);
-  }, []); 
+  }, []);
 
   function MainContent() {
     const location = useLocation();
@@ -30,6 +35,7 @@ function App() {
         ) : (
           <Routes>
             <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+            <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
             <Route
               path="/"
               element={
@@ -47,9 +53,21 @@ function App() {
               }
             />
             <Route
+              path="/posts"
+              element={
+                user && user.role === 'Admin' ? <Adminposts /> : <Navigate to="/login" />
+              }
+            />
+            <Route
               path="/newpost"
               element={
                 user && user.role === 'User' ? <NewPost /> : <Navigate to="/" />
+              }
+            />
+            <Route
+              path="/postSaved"
+              element={
+                user && user.role === 'User' ? <PostSaved /> : <Navigate to="/" />
               }
             />
             <Route
@@ -60,6 +78,8 @@ function App() {
             />
           </Routes>
         )}
+        <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
+
       </div>
     );
   }

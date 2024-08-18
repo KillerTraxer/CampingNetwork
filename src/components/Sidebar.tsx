@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import useUserStore from '../features/auth/userAuth';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function Sidebar() {
     const [isOpen, setIsOpen] = useState(false);
     const logout = useUserStore(state => state.logout);
     const navigate = useNavigate(); // Hook para navegar a otras rutas
     const user = useUserStore(state => state.user);
+    const location = useLocation();
 
     const handleLogout = () => {
         logout();
@@ -16,8 +17,6 @@ export default function Sidebar() {
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
     };
-
-    console.log(isOpen)
 
     return (
         <>
@@ -59,15 +58,6 @@ export default function Sidebar() {
                                             </p>
                                         </div>
                                         <ul className="py-1" role="none">
-                                            {/* <li>
-                                            <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white" role="menuitem">Dashboard</a>
-                                        </li>
-                                        <li>
-                                            <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white" role="menuitem">Settings</a>
-                                        </li>
-                                        <li>
-                                            <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white" role="menuitem">Earnings</a>
-                                        </li> */}
                                             <li>
                                                 <a href="#" onClick={handleLogout} className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white" role="menuitem">Cerrar Sesion</a>
                                             </li>
@@ -86,7 +76,7 @@ export default function Sidebar() {
                         {user && user.role === "Admin" ? (
                             <>
                                 <li>
-                                    <a href="/admin" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
+                                    <a href="/admin" className={`flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group ${location.pathname === "/admin" ? "bg-gray-700" : ""}`}>
                                         <svg className="w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                             <path fill-rule="evenodd" d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z" clip-rule="evenodd" />
                                         </svg>
@@ -95,7 +85,7 @@ export default function Sidebar() {
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="/posts" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
+                                    <a href="/posts" className={`flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group ${location.pathname === "/posts" ? "bg-gray-700" : ""}`}>
                                         <svg className="w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                             <path fill-rule="evenodd" d="M4.857 3A1.857 1.857 0 0 0 3 4.857v4.286C3 10.169 3.831 11 4.857 11h4.286A1.857 1.857 0 0 0 11 9.143V4.857A1.857 1.857 0 0 0 9.143 3H4.857Zm10 0A1.857 1.857 0 0 0 13 4.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 21 9.143V4.857A1.857 1.857 0 0 0 19.143 3h-4.286Zm-10 10A1.857 1.857 0 0 0 3 14.857v4.286C3 20.169 3.831 21 4.857 21h4.286A1.857 1.857 0 0 0 11 19.143v-4.286A1.857 1.857 0 0 0 9.143 13H4.857ZM18 14a1 1 0 1 0-2 0v2h-2a1 1 0 1 0 0 2h2v2a1 1 0 1 0 2 0v-2h2a1 1 0 1 0 0-2h-2v-2Z" clip-rule="evenodd" />
                                         </svg>
@@ -106,7 +96,7 @@ export default function Sidebar() {
                         ) : (
                             <>
                                 <li>
-                                    <a href="/" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
+                                    <a href="/" className={`flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group ${location.pathname === "/" ? "bg-gray-700" : ""}`}>
                                         <svg className="w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                             <path fill-rule="evenodd" d="M11.293 3.293a1 1 0 0 1 1.414 0l6 6 2 2a1 1 0 0 1-1.414 1.414L19 12.414V19a2 2 0 0 1-2 2h-3a1 1 0 0 1-1-1v-3h-2v3a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2v-6.586l-.293.293a1 1 0 0 1-1.414-1.414l2-2 6-6Z" clip-rule="evenodd" />
                                         </svg>
@@ -114,7 +104,7 @@ export default function Sidebar() {
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="/newpost" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
+                                    <a href="/newpost" className={`flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group ${location.pathname === "/newpost" ? "bg-gray-700" : ""}`}>
                                         <svg className="w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                             <path fill-rule="evenodd" d="M4.857 3A1.857 1.857 0 0 0 3 4.857v4.286C3 10.169 3.831 11 4.857 11h4.286A1.857 1.857 0 0 0 11 9.143V4.857A1.857 1.857 0 0 0 9.143 3H4.857Zm10 0A1.857 1.857 0 0 0 13 4.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 21 9.143V4.857A1.857 1.857 0 0 0 19.143 3h-4.286Zm-10 10A1.857 1.857 0 0 0 3 14.857v4.286C3 20.169 3.831 21 4.857 21h4.286A1.857 1.857 0 0 0 11 19.143v-4.286A1.857 1.857 0 0 0 9.143 13H4.857ZM18 14a1 1 0 1 0-2 0v2h-2a1 1 0 1 0 0 2h2v2a1 1 0 1 0 2 0v-2h2a1 1 0 1 0 0-2h-2v-2Z" clip-rule="evenodd" />
                                         </svg>
@@ -122,7 +112,15 @@ export default function Sidebar() {
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="/maps" className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group">
+                                    <a href="/postSaved" className={`flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group ${location.pathname === "/postSaved" ? "bg-gray-700" : ""}`}>
+                                        <svg className="w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                            <path fill-rule="evenodd" d="M3 6a2 2 0 0 1 2-2h5.532a2 2 0 0 1 1.536.72l1.9 2.28H3V6Zm0 3v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9H3Z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span className="ms-3">Tus publicaciones</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/maps" className={`flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group ${location.pathname === "/maps" ? "bg-gray-700" : ""}`}>
                                         <svg className="w-5 h-5 transition duration-75 text-gray-400 group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                             <path fill-rule="evenodd" d="M5 9a7 7 0 1 1 8 6.93V21a1 1 0 1 1-2 0v-5.07A7.001 7.001 0 0 1 5 9Zm5.94-1.06A1.5 1.5 0 0 1 12 7.5a1 1 0 1 0 0-2A3.5 3.5 0 0 0 8.5 9a1 1 0 0 0 2 0c0-.398.158-.78.44-1.06Z" clip-rule="evenodd" />
                                         </svg>

@@ -1,16 +1,17 @@
 import axios from "axios";
 import { useState } from "react";
-import useUserStore from '../features/auth/userAuth';
+import Swal from 'sweetalert2';
+import { useNavigate } from "react-router-dom";
 
-function LoginForm() {
-    const [credentials, setCredentials] = useState({ email: '', password: '' });
+function RegisterForm() {
+    const [userInfo, setUserInfo] = useState({ name: '', lastName: '', email: '', password: '', role: "User" });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const setUser = useUserStore(state => state.setUser);
+    const navigate = useNavigate();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setCredentials({
-            ...credentials,
+        setUserInfo({
+            ...userInfo,
             [e.target.name]: e.target.value,
         });
     };
@@ -19,8 +20,18 @@ function LoginForm() {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await axios.post('http://localhost:3000/api/auth', credentials);
-            setUser(response.data.user);
+            await axios.post('http://localhost:3000/api/register', userInfo);
+            Swal.fire({
+                title: 'Usuario registrado',
+                text: "Ahora puedes iniciar sesión!",
+                icon: 'success',
+                background: "#111827",
+                color: "#ffff"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    navigate("/login");
+                }
+            });
             setError("");
         } catch (err: any) {
             if (axios.isAxiosError(err)) {
@@ -41,17 +52,25 @@ function LoginForm() {
                 <div className="w-full rounded-lg shadow border md:mt-0 sm:max-w-md xl:p-0 bg-gray-800 border-gray-700">
                     <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
                         <h1 className="text-xl font-bold leading-tight tracking-tight md:text-2xl text-white text-center">
-                            Login
+                            Registro
                         </h1>
                         {error && <p className="text-red-500 bg-red-200 p-3 text-center rounded-md">{error}</p>}
                         <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
                             <div>
+                                <label className="block mb-2 text-sm font-medium text-white">Nombre</label>
+                                <input type="text" name="name" id='name' value={userInfo.name} onChange={handleChange} className="border rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Mario" required />
+                            </div>
+                            <div>
+                                <label className="block mb-2 text-sm font-medium text-white">Apellidos</label>
+                                <input type="text" name="lastName" id='lastName' value={userInfo.lastName} onChange={handleChange} className="border rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="Garcia" required />
+                            </div>
+                            <div>
                                 <label className="block mb-2 text-sm font-medium text-white">Email</label>
-                                <input type="text" name="email" id='email' value={credentials.email} onChange={handleChange} className="border rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="name@company.com" required />
+                                <input autoComplete="new-password" type="email" name="email" id='email' value={userInfo.email} onChange={handleChange} className="border rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" placeholder="name@company.com" required />
                             </div>
                             <div>
                                 <label htmlFor="password" className="block mb-2 text-sm font-medium text-white">Contraseña</label>
-                                <input type="password" name="password" id="password" value={credentials.password} onChange={handleChange} placeholder="••••••••" className="border rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" required />
+                                <input autoComplete="new-password" type="password" name="password" id="password" value={userInfo.password} onChange={handleChange} placeholder="••••••••" className="border rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500" required />
                             </div>
                             <button type="submit" className="w-full text-white focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center bg-blue-600 hover:bg-blue-700 focus:ring-blue-800">
                                 {!loading ? (
@@ -69,7 +88,7 @@ function LoginForm() {
                                 )}
                             </button>
                             <p className="text-sm font-light text-gray-400">
-                                No tienes cuenta? <a href="/register" className="font-medium hover:underline text-blue-500">Registrarse</a>
+                                Tienes cuenta? <a href="/login" className="font-medium hover:underline text-blue-500">Inicar sesión</a>
                             </p>
                         </form>
                     </div>
@@ -79,4 +98,4 @@ function LoginForm() {
     )
 }
 
-export default LoginForm
+export default RegisterForm

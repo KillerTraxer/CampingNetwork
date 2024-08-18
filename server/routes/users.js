@@ -1,15 +1,30 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User'); // Asegúrate de tener tu modelo User importado
+const User = require('../models/User')
 
-// Ruta GET /api/users (obtener todos los usuarios)
 router.get('/', async (req, res) => {
     try {
-        const users = await User.find(); // Busca todos los usuarios en la colección User
-        res.json(users); // Devuelve los usuarios en formato JSON
+        const users = await User.find();
+        res.json(users);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error al obtener los usuarios' });
+    }
+});
+
+router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const deletedUser = await User.findByIdAndDelete(id);
+        if (!deletedUser) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        res.json(deletedUser);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al eliminar el usuario' });
     }
 });
 

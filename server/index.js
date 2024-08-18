@@ -3,6 +3,7 @@ const connectDB = require('./config');
 const authRoutes = require('./routes/auth');
 const createPost = require('./routes/createpost');
 const usersRoutes = require('./routes/users');
+const registerRoutes = require("./routes/register")
 const cors = require('cors');
 
 const app = express();
@@ -16,6 +17,7 @@ app.get('/api', (req, res) => {
     res.send('Conectado');
 });
 app.use('/api/auth', authRoutes);
+app.use('/api/register', registerRoutes);
 app.use('/api/createpost', createPost);
 app.use('/api/users', usersRoutes);
 
